@@ -36,6 +36,12 @@ M.setup = function()
       M.insert_completion_result()
     end,
   })
+
+  vim.api.nvim_set_keymap('i', config.get_config({ 'completion', 'regenerate_key' }) or '<S-`>', '', {
+    callback = function()
+      M._gemini_complete()
+    end,
+  })
 end
 
 local get_prompt_text = function(bufnr, pos)

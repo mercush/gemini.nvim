@@ -16,6 +16,7 @@ local default_completion_config = {
   blacklist_filenames = { '.env' },
   completion_delay = 1000,
   insert_result_key = '<S-Tab>',
+  regenerate_key = '<S-`>',
   move_cursor_end = true,
   can_complete = function()
     return vim.fn.pumvisible() ~= 1
