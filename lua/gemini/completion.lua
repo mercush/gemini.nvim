@@ -10,7 +10,9 @@ local context = {
 }
 
 M.setup = function()
+  print("gemini.completion.setup()")
   if not config.get_config({ 'completion', 'enabled' }) then
+    print("completion not enabled")
     return
   end
 
@@ -21,10 +23,12 @@ M.setup = function()
 
   vim.api.nvim_create_autocmd('CursorMovedI', {
     callback = function()
+      print("CursorMovedI callback")
       local buf = vim.api.nvim_get_current_buf()
       local filetype = vim.api.nvim_get_option_value('filetype', { buf = buf })
       local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":t")
       if util.is_blacklisted(blacklist_filetypes, filetype) or util.is_blacklisted(blacklist_filenames, filename) then
+        print("file is blacklisted")
         return
       end
       M.gemini_complete()
@@ -33,6 +37,7 @@ M.setup = function()
 
   vim.api.nvim_set_keymap('i', config.get_config({ 'completion', 'insert_result_key' }) or '<S-Tab>', '', {
     callback = function()
+      print("insert_result_key callback")
       M.insert_completion_result()
     end,
   })
@@ -48,45 +53,61 @@ local get_prompt_text = function(bufnr, pos)
 end
 
 M._gemini_complete = function()
+  print("gemini.completion._gemini_complete()")
   local bufnr = vim.api.nvim_get_current_buf()
   local win = vim.api.nvim_get_current_win()
   local pos = vim.api.nvim_win_get_cursor(win)
   local user_text = get_prompt_text(bufnr, pos)
   if not user_text then
+    print("no user text")
     return
   end
+
+  print("user_text: " .. user_text)
 
   local system_text = nil
   local get_system_text = config.get_config({ 'completion', 'get_system_text' })
   if get_system_text then
     system_text = get_system_text()
+    print("system_text: " .. system_text)
   end
 
   local generation_config = config.get_gemini_generation_config()
   local model_id = config.get_config({ 'model', 'model_id' })
+  print("model_id: " .. model_id)
   api.gemini_generate_content(user_text, system_text, model_id, generation_config, function(result)
+    print("gemini_generate_content callback")
     local json_text = result.stdout
     if json_text and #json_text > 0 then
+      print("json_text: " .. json_text)
       local model_response = vim.json.decode(json_text)
       model_response = util.table_get(model_response, { 'candidates', 1, 'content', 'parts', 1, 'text' })
       if model_response ~= nil and #model_response > 0 then
+        print("model_response: " .. model_response)
         vim.schedule(function()
           if model_response then
             M.show_completion_result(model_response, win, pos)
           end
         end)
+      else
+        print("no model response")
       end
+    else
+      print("no json text")
     end
   end)
 end
 
 M.gemini_complete = util.debounce(function()
+  print("gemini.completion.gemini_complete()")
   if vim.fn.mode() ~= 'i' then
+    print("not in insert mode")
     return
   end
 
   local can_complete = config.get_config({'completion', 'can_complete'})
   if not can_complete or not can_complete() then
+    print("can_complete() returned false")
     return
   end
 
@@ -95,24 +116,31 @@ M.gemini_complete = util.debounce(function()
 end, config.get_config({ 'completion', 'completion_delay' }) or 1000)
 
 M.show_completion_result = function(result, win_id, pos)
+  print("gemini.completion.show_completion_result()")
   local win = vim.api.nvim_get_current_win()
   if win ~= win_id then
+    print("not in the same window")
     return
   end
 
   local current_pos = vim.api.nvim_win_get_cursor(win)
   if current_pos[1] ~= pos[1] or current_pos[2] ~= pos[2] then
+    print("cursor has moved")
     return
   end
 
   if vim.fn.mode() ~= 'i' then
+    print("not in insert mode")
     return
   end
 
   local can_complete = config.get_config({'completion', 'can_complete'})
   if not can_complete or not can_complete() then
+    print("can_complete() returned false")
     return
   end
+
+  print("showing completion result: " .. result)
 
   local bufnr = vim.api.nvim_get_current_buf()
   local options = {
@@ -145,6 +173,7 @@ M.show_completion_result = function(result, win_id, pos)
   vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI', 'InsertLeavePre' }, {
     buffer = bufnr,
     callback = function()
+      print("autocmd to clear completion")
       context.completion = nil
       vim.api.nvim_buf_del_extmark(bufnr, context.namespace_id, id)
       vim.api.nvim_command('redraw')

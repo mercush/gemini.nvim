@@ -17,12 +17,15 @@ M.MODELS = {
 }
 
 M.gemini_generate_content = function(user_text, system_text, model_name, generation_config, callback)
+  print("gemini.api.gemini_generate_content()")
   local api_key = os.getenv("GEMINI_API_KEY")
   if not api_key then
+    print("GEMINI_API_KEY not set")
     return ''
   end
 
   local api = API .. model_name .. ':generateContent?key=' .. api_key
+  print("api: " .. api)
   local contents = {
     {
       role = 'user',
@@ -49,6 +52,7 @@ M.gemini_generate_content = function(user_text, system_text, model_name, generat
   end
 
   local json_text = vim.json.encode(data)
+  print("json_text: " .. json_text)
   local cmd = { 'curl', '-X', 'POST', api, '-H', 'Content-Type: application/json', '--data-binary', '@-' }
   local opts = { stdin = json_text }
   if callback then
