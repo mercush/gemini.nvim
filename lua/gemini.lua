@@ -1,5 +1,4 @@
 local config = require('gemini.config')
-print("in gemini github")
 local M = {}
 
 local function is_nvim_version_ge(major, minor, patch)
@@ -17,7 +16,6 @@ local function is_nvim_version_ge(major, minor, patch)
 end
 
 M.setup = function(opts)
-  print("gemini.setup()")
   if not vim.fn.executable('curl') then
     vim.notify('curl is not found', vim.log.levels.WARN)
     return
@@ -28,12 +26,9 @@ M.setup = function(opts)
     return
   end
 
-  print("setting config")
   config.set_config(opts)
 
-  print("requiring gemini.completion")
   require('gemini.completion').setup()
-  print("gemini.setup() finished")
 end
 
 return M

@@ -49,16 +49,13 @@ local default_completion_config = {
 }
 
 M.set_config = function(opts)
-  print("gemini.config.set_config()")
   opts = opts or {}
-  print("opts: " .. vim.inspect(opts))
 
   M.config = {
     model = vim.tbl_deep_extend('force', {}, default_model_config, opts.model_config or {}),
     completion = vim.tbl_deep_extend('force', {}, default_completion_config, opts.completion or {}),
   }
 
-  print("final config: " .. vim.inspect(M.config))
 end
 
 M.get_config = function(keys)
