@@ -40,7 +40,7 @@ M.gemini_generate_content = function(user_text, system_text, model_name, generat
   }
   if system_text then
     data.systemInstruction = {
-      role = 'user',
+      role = 'system',
       parts = {
         {
           text = system_text,
