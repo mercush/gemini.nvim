@@ -37,7 +37,7 @@ M.setup = function()
     end,
   })
 
-  vim.api.nvim_set_keymap('i', config.get_config({ 'completion', 'regenerate_key' }) or '<S-`>', '', {
+  vim.api.nvim_set_keymap('i', config.get_config({ 'completion', 'regenerate_key' }) or '<S-Space>', '', {
     callback = function()
       M._gemini_complete()
     end,
