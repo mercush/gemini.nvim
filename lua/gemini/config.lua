@@ -26,7 +26,7 @@ local default_completion_config = {
       .. "\n* Your task is to provide code suggestion at the cursor location marked by <cursor></cursor>."
       .. '\n* Your response does not need to contain explanation.'
       .. '\n* Do not wrap your code response in ```'
-      .. '\n* Index highly on comments, some of which give instructions on tasks that you should complete."
+      .. '\n* Index highly on comments, some of which give instructions on tasks that you should complete.'
   end,
   get_prompt = function(bufnr, pos)
     local filetype = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
