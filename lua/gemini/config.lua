@@ -16,7 +16,7 @@ local default_completion_config = {
   blacklist_filenames = { '.env' },
   completion_delay = 1000,
   insert_result_key = '<S-Tab>',
-  regenerate_key = '<S-`>',
+  regenerate_key = '<S-Enter>',
   move_cursor_end = true,
   can_complete = function()
     return vim.fn.pumvisible() ~= 1
@@ -25,8 +25,9 @@ local default_completion_config = {
     return "You are a coding AI assistant that autocomplete user's code."
       .. "\n* Your task is to provide code suggestion at the cursor location marked by <cursor></cursor>."
       .. '\n* Your response does not need to contain explanation.'
-      .. '\n* Do not wrap your code response in ```'
       .. '\n* Index highly on comments, some of which give instructions on tasks that you should complete.'
+      .. '\n* Always output your code in a Markdown code environment, making sure to begin and end code suggestions with backticks (```).'
+      .. '\n* Do not add any other contents different from code'
   end,
   get_prompt = function(bufnr, pos)
     local filetype = vim.api.nvim_get_option_value('filetype', { buf = bufnr })

@@ -59,6 +59,63 @@ M.gemini_generate_content = function(user_text, system_text, model_name, generat
   end
 end
 
+M.gemini_regenerate_content = function(user_text, assistant_text, system_text, model_name, generation_config, callback)
+  local api_key = os.getenv("GEMINI_API_KEY")
+  if not api_key then
+    return ''
+  end
+
+  local api = API .. model_name .. ':generateContent?key=' .. api_key
+  local contents = {
+    {
+      role = 'user',
+      parts = {
+        {
+          text = user_text
+        }
+      }
+    },
+    {
+      role = 'assistant', 
+      parts = {
+        {
+	  text = assistant_text
+	}
+      }
+    },
+    {
+      role = 'user', 
+      parts = {
+        {
+	  text = 'That wasn\'t quite right. Try again.'
+	}
+      }
+    },
+  }
+  local data = {
+    contents = contents,
+    generationConfig = generation_config,
+  }
+  if system_text then
+    data.systemInstruction = {
+      role = 'system',
+      parts = {
+        {
+          text = system_text,
+        }
+      }
+    }
+  end
+
+  local json_text = vim.json.encode(data)
+  local cmd = { 'curl', '-X', 'POST', api, '-H', 'Content-Type: application/json', '--data-binary', '@-' }
+  local opts = { stdin = json_text }
+  if callback then
+    return vim.system(cmd, opts, callback)
+  else
+    return vim.system(cmd, opts)
+  end
+end
 M.gemini_generate_content_stream = function(user_text, model_name, generation_config, callback)
   local api_key = os.getenv("GEMINI_API_KEY")
   if not api_key then

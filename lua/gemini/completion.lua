@@ -37,9 +37,9 @@ M.setup = function()
     end,
   })
 
-  vim.api.nvim_set_keymap('i', config.get_config({ 'completion', 'regenerate_key' }) or '<S-Space>', '', {
+  vim.api.nvim_set_keymap('i', config.get_config({ 'completion', 'regenerate_key' }) or '<S-Enter>', '', {
     callback = function()
-      M._gemini_complete()
+      M.gemini_regenerate()
     end,
   })
 end
@@ -62,7 +62,6 @@ M._gemini_complete = function()
     return
   end
 
-
   local system_text = nil
   local get_system_text = config.get_config({ 'completion', 'get_system_text' })
   if get_system_text then
@@ -76,6 +75,53 @@ M._gemini_complete = function()
     if json_text and #json_text > 0 then
       local model_response = vim.json.decode(json_text)
       model_response = util.table_get(model_response, { 'candidates', 1, 'content', 'parts', 1, 'text' })
+      model_response = model_response:match("``[a-z]*\n(.-)\n``")
+      if model_response ~= nil and #model_response > 0 then
+        vim.schedule(function()
+          if model_response then
+            M.show_completion_result(model_response, win, pos)
+          end
+        end)
+      else
+      end
+    else
+    end
+  end)
+end
+
+M.gemini_regenerate = function()
+  if not context.completion then
+    return
+  end
+  local bufnr = vim.api.nvim_get_current_buf()
+  local win = vim.api.nvim_get_current_win()
+  local pos = vim.api.nvim_win_get_cursor(win)
+  local user_text = get_prompt_text(bufnr, pos)
+
+  context.completion.content = "🔄" .. context.completion.content
+  vim.schedule(function()
+    M.show_completion_result(context.completion.content, win, pos)
+  end)
+
+  if not user_text then
+    return
+  end
+
+
+  local system_text = nil
+  local get_system_text = config.get_config({ 'completion', 'get_system_text' })
+  if get_system_text then
+    system_text = get_system_text()
+  end
+
+  local generation_config = config.get_gemini_generation_config()
+  local model_id = config.get_config({ 'model', 'model_id' })
+  api.gemini_regenerate_content(user_text, context.completion.content, system_text, model_id, generation_config, function(result)
+    local json_text = result.stdout
+    if json_text and #json_text > 0 then
+      local model_response = vim.json.decode(json_text)
+      model_response = util.table_get(model_response, { 'candidates', 1, 'content', 'parts', 1, 'text' })
+      model_response = model_response:match("``[a-z]*\n(.-)\n``")
       if model_response ~= nil and #model_response > 0 then
         vim.schedule(function()
           if model_response then
@@ -132,7 +178,8 @@ M.show_completion_result = function(result, win_id, pos)
     virt_text_pos = 'inline',
   }
 
-  local content = result:match("^%s*(.-)%s*$")
+  -- local content = result:match("``[a-z]*\n(.-)\n``")
+  local content = result
   for i, l in pairs(vim.split(content, '\n')) do
     if i == 1 then
       options.virt_text[1] = { l, 'Comment' }
@@ -145,7 +192,7 @@ M.show_completion_result = function(result, win_id, pos)
   local id = vim.api.nvim_buf_set_extmark(bufnr, context.namespace_id, row - 1, col, options)
 
   context.completion = {
-    content = content,
+    content = result,
     row = row,
     col = col,
     bufnr = bufnr,
