@@ -72,19 +72,26 @@ M._gemini_complete = function()
   local model_id = config.get_config({ 'model', 'model_id' })
   api.gemini_generate_content(user_text, system_text, model_id, generation_config, function(result)
     local json_text = result.stdout
+    print("DEBUG: Completion response: " .. (json_text or "nil"))
     if json_text and #json_text > 0 then
       local model_response = vim.json.decode(json_text)
-      model_response = util.table_get(model_response, { 'candidates', 1, 'content', 'parts', 1, 'text' })
-      model_response = model_response:match("``[a-z]*\n(.-)\n``")
+      -- OpenRouter uses OpenAI format: choices[0].message.content
+      model_response = util.table_get(model_response, { 'choices', 1, 'message', 'content' })
+      if model_response then
+        model_response = model_response:match("```[a-z]*\n(.-)\n```") or model_response
+      end
       if model_response ~= nil and #model_response > 0 then
         vim.schedule(function()
           if model_response then
+            print("DEBUG: model_response: " .. model_response)
             M.show_completion_result(model_response, win, pos)
           end
         end)
       else
+        print("DEBUG: No model response extracted")
       end
     else
+      print("DEBUG: Empty or nil response")
     end
   end)
 end
@@ -118,10 +125,14 @@ M.gemini_regenerate = function()
   local model_id = config.get_config({ 'model', 'model_id' })
   api.gemini_regenerate_content(user_text, context.completion.content, system_text, model_id, generation_config, function(result)
     local json_text = result.stdout
+    print("DEBUG: Regenerate response: " .. (json_text or "nil"))
     if json_text and #json_text > 0 then
       local model_response = vim.json.decode(json_text)
-      model_response = util.table_get(model_response, { 'candidates', 1, 'content', 'parts', 1, 'text' })
-      model_response = model_response:match("``[a-z]*\n(.-)\n``")
+      -- OpenRouter uses OpenAI format: choices[0].message.content
+      model_response = util.table_get(model_response, { 'choices', 1, 'message', 'content' })
+      if model_response then
+        model_response = model_response:match("```[a-z]*\n(.-)\n```") or model_response
+      end
       if model_response ~= nil and #model_response > 0 then
         vim.schedule(function()
           if model_response then
@@ -129,8 +140,10 @@ M.gemini_regenerate = function()
           end
         end)
       else
+        print("DEBUG: No model response extracted from regenerate")
       end
     else
+      print("DEBUG: Empty or nil regenerate response")
     end
   end)
 end

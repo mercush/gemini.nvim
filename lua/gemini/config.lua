@@ -4,7 +4,7 @@ local util = require('gemini.util')
 local M = {}
 
 local default_model_config = {
-  model_id = api.MODELS.GEMINI_2_0_FLASH,
+  model_id = api.MODELS.GEMINI_2_5_FLASH,
   temperature = 0.1,
   top_k = 128,
   response_mime_type = 'text/plain',
