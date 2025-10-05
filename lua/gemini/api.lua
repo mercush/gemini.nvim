@@ -23,7 +23,6 @@ M.gemini_generate_content = function(user_text, system_text, model_name, generat
     return ''
   end
 
-  print("DEBUG: Using model: " .. model_name)
   local api = API .. "/chat/completions"
 
   -- OpenRouter uses OpenAI-style messages format
@@ -58,7 +57,6 @@ M.gemini_generate_content = function(user_text, system_text, model_name, generat
   end
 
   local json_text = vim.json.encode(data)
-  print("DEBUG: Request payload: " .. json_text)
 
   local cmd = {
     'curl', '-X', 'POST', api,
@@ -68,7 +66,6 @@ M.gemini_generate_content = function(user_text, system_text, model_name, generat
   }
   local opts = { stdin = json_text }
 
-  print("DEBUG: Sending request to: " .. api)
   if callback then
     return vim.system(cmd, opts, callback)
   else
@@ -83,7 +80,6 @@ M.gemini_regenerate_content = function(user_text, assistant_text, system_text, m
     return ''
   end
 
-  print("DEBUG: Regenerating with model: " .. model_name)
   local api = API .. "/chat/completions"
 
   -- OpenRouter uses OpenAI-style messages format
@@ -126,7 +122,6 @@ M.gemini_regenerate_content = function(user_text, assistant_text, system_text, m
   end
 
   local json_text = vim.json.encode(data)
-  print("DEBUG: Regenerate request payload: " .. json_text)
 
   local cmd = {
     'curl', '-X', 'POST', api,
@@ -136,7 +131,6 @@ M.gemini_regenerate_content = function(user_text, assistant_text, system_text, m
   }
   local opts = { stdin = json_text }
 
-  print("DEBUG: Sending regenerate request to: " .. api)
   if callback then
     return vim.system(cmd, opts, callback)
   else
@@ -155,7 +149,6 @@ M.gemini_generate_content_stream = function(user_text, model_name, generation_co
     return
   end
 
-  print("DEBUG: Streaming with model: " .. model_name)
   local api = API .. "/chat/completions"
 
   local messages = {
@@ -185,7 +178,6 @@ M.gemini_generate_content_stream = function(user_text, model_name, generation_co
   end
 
   local json_text = vim.json.encode(data)
-  print("DEBUG: Stream request payload: " .. json_text)
 
   local stdin = uv.new_pipe()
   local stdout = uv.new_pipe()
@@ -200,9 +192,7 @@ M.gemini_generate_content_stream = function(user_text, model_name, generation_co
     }
   }
 
-  print("DEBUG: Starting stream to: " .. api)
   uv.spawn('curl', options, function(code, _)
-    print("DEBUG: Stream finished with code: " .. tostring(code))
   end)
 
   local streamed_data = ''
@@ -221,7 +211,6 @@ M.gemini_generate_content_stream = function(user_text, model_name, generation_co
       while start_index and end_index do
         if end_index >= start_index then
           json_text = string.sub(streamed_data, start_index + 5, end_index - 1)
-          print("DEBUG: Received chunk: " .. json_text)
           callback(json_text)
         end
         streamed_data = string.sub(streamed_data, end_index + 1)
