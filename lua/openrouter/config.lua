@@ -1,5 +1,5 @@
-local api = require('gemini.api')
-local util = require('gemini.util')
+local api = require('openrouter.api')
+local util = require('openrouter.util')
 
 local M = {}
 
@@ -65,7 +65,7 @@ M.get_config = function(keys)
   return util.table_get(M.config, keys)
 end
 
-M.get_gemini_generation_config = function()
+M.get_generation_config = function()
   return {
     temperature = M.get_config({ 'model', 'temperature' }) or default_model_config.temperature,
     topK = M.get_config({ 'model', 'top_k' }) or default_model_config.top_k,

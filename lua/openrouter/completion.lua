@@ -1,6 +1,6 @@
-local config = require('gemini.config')
-local util = require('gemini.util')
-local api = require('gemini.api')
+local config = require('openrouter.config')
+local util = require('openrouter.util')
+local api = require('openrouter.api')
 
 local M = {}
 
@@ -17,7 +17,7 @@ M.setup = function()
   local blacklist_filetypes = config.get_config({ 'completion', 'blacklist_filetypes' }) or {}
   local blacklist_filenames = config.get_config({ 'completion', 'blacklist_filenames' }) or {}
 
-  context.namespace_id = vim.api.nvim_create_namespace('gemini_completion')
+  context.namespace_id = vim.api.nvim_create_namespace('completion')
 
   vim.api.nvim_create_autocmd('CursorMovedI', {
     callback = function()
@@ -27,7 +27,7 @@ M.setup = function()
       if util.is_blacklisted(blacklist_filetypes, filetype) or util.is_blacklisted(blacklist_filenames, filename) then
         return
       end
-      M.gemini_complete()
+      M.complete()
     end,
   })
 
@@ -39,7 +39,7 @@ M.setup = function()
 
   vim.api.nvim_set_keymap('i', config.get_config({ 'completion', 'regenerate_key' }) or '<S-Enter>', '', {
     callback = function()
-      M.gemini_regenerate()
+      M.regenerate()
     end,
   })
 end
@@ -53,7 +53,7 @@ local get_prompt_text = function(bufnr, pos)
   return get_prompt(bufnr, pos)
 end
 
-M._gemini_complete = function()
+M._complete = function()
   local bufnr = vim.api.nvim_get_current_buf()
   local win = vim.api.nvim_get_current_win()
   local pos = vim.api.nvim_win_get_cursor(win)
@@ -68,9 +68,9 @@ M._gemini_complete = function()
     system_text = get_system_text()
   end
 
-  local generation_config = config.get_gemini_generation_config()
+  local generation_config = config.get_generation_config()
   local model_id = config.get_config({ 'model', 'model_id' })
-  api.gemini_generate_content(user_text, system_text, model_id, generation_config, function(result)
+  api.generate_content(user_text, system_text, model_id, generation_config, function(result)
     local json_text = result.stdout
     if json_text and #json_text > 0 then
       local model_response = vim.json.decode(json_text)
@@ -92,7 +92,7 @@ M._gemini_complete = function()
   end)
 end
 
-M.gemini_regenerate = function()
+M.regenerate = function()
   if not context.completion then
     return
   end
@@ -117,9 +117,9 @@ M.gemini_regenerate = function()
     system_text = get_system_text()
   end
 
-  local generation_config = config.get_gemini_generation_config()
+  local generation_config = config.get_generation_config()
   local model_id = config.get_config({ 'model', 'model_id' })
-  api.gemini_regenerate_content(user_text, context.completion.content, system_text, model_id, generation_config, function(result)
+  api.regenerate_content(user_text, context.completion.content, system_text, model_id, generation_config, function(result)
     local json_text = result.stdout
     if json_text and #json_text > 0 then
       local model_response = vim.json.decode(json_text)
@@ -141,7 +141,7 @@ M.gemini_regenerate = function()
   end)
 end
 
-M.gemini_complete = util.debounce(function()
+M.complete = util.debounce(function()
   if vim.fn.mode() ~= 'i' then
     return
   end
@@ -151,7 +151,7 @@ M.gemini_complete = util.debounce(function()
     return
   end
 
-  M._gemini_complete()
+  M._complete()
 end, config.get_config({ 'completion', 'completion_delay' }) or 1000)
 
 M.show_completion_result = function(result, win_id, pos)

@@ -1,4 +1,4 @@
-local config = require('gemini.config')
+local config = require('openrouter.config')
 local M = {}
 
 local function is_nvim_version_ge(major, minor, patch)
@@ -28,7 +28,7 @@ M.setup = function(opts)
 
   config.set_config(opts)
 
-  require('gemini.completion').setup()
+  require('openrouter.completion').setup()
 end
 
 return M

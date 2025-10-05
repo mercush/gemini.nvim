@@ -10,7 +10,7 @@ M.MODELS = {
   ZAI_GLM = 'z-ai/glm-4.6'
 }
 
-M.gemini_generate_content = function(user_text, system_text, model_name, generation_config, callback)
+M.generate_content = function(user_text, system_text, model_name, generation_config, callback)
   local api_key = os.getenv("OPENROUTER_API_KEY")
   if not api_key then
     print("ERROR: OPENROUTER_API_KEY not found")
@@ -67,7 +67,7 @@ M.gemini_generate_content = function(user_text, system_text, model_name, generat
   end
 end
 
-M.gemini_regenerate_content = function(user_text, assistant_text, system_text, model_name, generation_config, callback)
+M.regenerate_content = function(user_text, assistant_text, system_text, model_name, generation_config, callback)
   local api_key = os.getenv("OPENROUTER_API_KEY")
   if not api_key then
     print("ERROR: OPENROUTER_API_KEY not found")
@@ -131,7 +131,7 @@ M.gemini_regenerate_content = function(user_text, assistant_text, system_text, m
     return vim.system(cmd, opts)
   end
 end
-M.gemini_generate_content_stream = function(user_text, model_name, generation_config, callback)
+M.generate_content_stream = function(user_text, model_name, generation_config, callback)
   local api_key = os.getenv("OPENROUTER_API_KEY")
   if not api_key then
     print("ERROR: OPENROUTER_API_KEY not found")
