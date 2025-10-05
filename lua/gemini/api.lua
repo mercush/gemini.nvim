@@ -6,14 +6,8 @@ local API = "https://openrouter.ai/api/v1";
 
 M.MODELS = {
   GEMINI_2_5_FLASH = 'google/gemini-2.5-flash',
-  GEMINI_2_5_FLASH_PREVIEW = 'google/gemini-2.5-flash-preview-04-17',
-  GEMINI_2_5_PRO_PREVIEW = 'google/gemini-2.5-pro-preview-03-25',
-  GEMINI_2_0_FLASH_LITE = 'google/gemini-2.0-flash-lite',
-  GEMINI_2_0_FLASH_EXP = 'google/gemini-2.0-flash-exp',
-  GEMINI_2_0_FLASH_THINKING_EXP = 'google/gemini-2.0-flash-thinking-exp-1219',
-  GEMINI_1_5_PRO = 'google/gemini-1.5-pro',
-  GEMINI_1_5_FLASH = 'google/gemini-1.5-flash',
-  GEMINI_1_5_FLASH_8B = 'google/gemini-1.5-flash-8b',
+  GROK_4_FAST = 'x-ai/grok-4-fast',
+  ZAI_GLM = 'z-ai/glm-4.6'
 }
 
 M.gemini_generate_content = function(user_text, system_text, model_name, generation_config, callback)

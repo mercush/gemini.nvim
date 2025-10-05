@@ -4,7 +4,7 @@ local util = require('gemini.util')
 local M = {}
 
 local default_model_config = {
-  model_id = api.MODELS.GEMINI_2_5_FLASH,
+  model_id = api.MODELS.GROK_4_FAST,
   temperature = 0.1,
   top_k = 128,
   response_mime_type = 'text/plain',
@@ -24,7 +24,7 @@ local default_completion_config = {
   get_system_text = function()
     return "You are a coding AI assistant that autocomplete user's code."
       .. "\n* Your task is to provide code suggestion at the cursor location marked by <cursor></cursor>."
-      .. '\n* Your response does not need to contain explanation.'
+      .. '\n* Your response should not contain explanation.'
       .. '\n* Index highly on comments, some of which give instructions on tasks that you should complete.'
       .. '\n* Always output your code in a Markdown code environment, making sure to begin and end code suggestions with backticks (```).'
       .. '\n* Do not add any other contents different from code'
