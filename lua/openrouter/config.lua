@@ -4,7 +4,7 @@ local util = require('openrouter.util')
 local M = {}
 
 local default_model_config = {
-  model_id = api.MODELS.GROK_4_FAST,
+  model_id = api.MODELS.ZAI_GLM,
   temperature = 0.1,
   top_k = 128,
   response_mime_type = 'text/plain',
