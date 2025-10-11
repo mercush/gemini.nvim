@@ -73,8 +73,11 @@ M._complete = function()
   api.generate_content(user_text, system_text, model_id, generation_config, function(result)
     local json_text = result.stdout
     if json_text and #json_text > 0 then
-      local model_response = vim.json.decode(json_text)
-      -- OpenRouter uses OpenAI format: choices[0].message.content
+      local success, model_response = pcall(vim.json.decode, json_text)
+      if not success then
+        vim.notify('Failed to decode JSON: ' .. json_text, vim.log.levels.ERROR)
+        return
+      end
       model_response = util.table_get(model_response, { 'choices', 1, 'message', 'content' })
       if model_response then
         model_response = model_response:match("```[a-z]*\n(.-)\n```") or model_response
@@ -122,8 +125,11 @@ M.regenerate = function()
   api.regenerate_content(user_text, context.completion.content, system_text, model_id, generation_config, function(result)
     local json_text = result.stdout
     if json_text and #json_text > 0 then
-      local model_response = vim.json.decode(json_text)
-      -- OpenRouter uses OpenAI format: choices[0].message.content
+      local success, model_response = pcall(vim.json.decode, json_text)
+      if not success then
+        vim.notify('Failed to decode JSON: ' .. json_text, vim.log.levels.ERROR)
+        return
+      end
       model_response = util.table_get(model_response, { 'choices', 1, 'message', 'content' })
       if model_response then
         model_response = model_response:match("```[a-z]*\n(.-)\n```") or model_response
